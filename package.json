@@ -4,6 +4,7 @@
   "description": "Browse Azure Notification Hub device registrations, search by tag, and send test notifications — like the classic Visual Studio Notification Hub Explorer.",
   "version": "0.1.0",
   "publisher": "chaosifier",
+  "icon": "media/icon.png",
   "license": "MIT",
   "engines": {
     "vscode": "^1.90.0"
