@@ -3,10 +3,14 @@
   "displayName": "Azure Notification Hub Explorer",
   "description": "Browse Azure Notification Hub device registrations, search by tag, and send test notifications — like the classic Visual Studio Notification Hub Explorer.",
   "version": "0.1.0",
-  "publisher": "Sagar Dahal",
+  "publisher": "chaosifier",
   "license": "MIT",
   "engines": {
     "vscode": "^1.90.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chaosifier/notification-hub-explorer"
   },
   "categories": [
     "Azure",
