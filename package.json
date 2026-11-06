@@ -1,0 +1,179 @@
+{
+  "name": "notification-hub-explorer",
+  "displayName": "Azure Notification Hub Explorer",
+  "description": "Browse Azure Notification Hub device registrations, search by tag, and send test notifications — like the classic Visual Studio Notification Hub Explorer.",
+  "version": "0.1.0",
+  "publisher": "Sagar Dahal",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Azure",
+    "Other"
+  ],
+  "keywords": [
+    "azure",
+    "notification hubs",
+    "push",
+    "apns",
+    "fcm"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "notificationHubExplorer",
+          "title": "Notification Hubs",
+          "icon": "media/bell.svg"
+        }
+      ]
+    },
+    "views": {
+      "notificationHubExplorer": [
+        {
+          "id": "notificationHubs",
+          "name": "Hubs",
+          "icon": "media/bell.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "notificationHubs",
+        "contents": "No notification hubs connected yet.\n[Add Notification Hub](command:notificationHubs.addHub)\nYou'll need the hub name and a connection string with Listen/Send/Manage rights (e.g. DefaultFullSharedAccessSignature) for registration management."
+      }
+    ],
+    "commands": [
+      {
+        "command": "notificationHubs.addHub",
+        "title": "Add Notification Hub",
+        "category": "Notification Hubs",
+        "icon": "$(add)"
+      },
+      {
+        "command": "notificationHubs.refresh",
+        "title": "Refresh",
+        "category": "Notification Hubs",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "notificationHubs.openHub",
+        "title": "Open Hub Explorer",
+        "category": "Notification Hubs",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "notificationHubs.testSend",
+        "title": "Send Test Notification",
+        "category": "Notification Hubs",
+        "icon": "$(send)"
+      },
+      {
+        "command": "notificationHubs.searchByTag",
+        "title": "Search Registrations by Tag",
+        "category": "Notification Hubs",
+        "icon": "$(search)"
+      },
+      {
+        "command": "notificationHubs.editHub",
+        "title": "Edit Connection",
+        "category": "Notification Hubs"
+      },
+      {
+        "command": "notificationHubs.removeHub",
+        "title": "Remove Hub",
+        "category": "Notification Hubs",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "notificationHubs.addHub",
+          "when": "view == notificationHubs",
+          "group": "navigation@1"
+        },
+        {
+          "command": "notificationHubs.refresh",
+          "when": "view == notificationHubs",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "notificationHubs.testSend",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "inline@1"
+        },
+        {
+          "command": "notificationHubs.searchByTag",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "inline@2"
+        },
+        {
+          "command": "notificationHubs.openHub",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "1_open@1"
+        },
+        {
+          "command": "notificationHubs.testSend",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "1_open@2"
+        },
+        {
+          "command": "notificationHubs.searchByTag",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "1_open@3"
+        },
+        {
+          "command": "notificationHubs.editHub",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "2_manage@1"
+        },
+        {
+          "command": "notificationHubs.removeHub",
+          "when": "view == notificationHubs && viewItem == hub",
+          "group": "2_manage@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "notificationHubs.refresh",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Notification Hub Explorer",
+      "properties": {
+        "notificationHubExplorer.registrationPageSize": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Number of registrations to load per page (max 100)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build -- --minify",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --sourcemap",
+    "watch": "npm run build -- --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies --skip-license --allow-missing-repository"
+  },
+  "dependencies": {
+    "@azure/notification-hubs": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^4.1.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
