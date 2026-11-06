@@ -1,4 +1,8 @@
-# Azure Notification Hub Explorer for VS Code
+<p align="center">
+  <img src="media/icon.png" alt="Azure Notification Hub Explorer icon" width="128" height="128">
+</p>
+
+<h1 align="center">Azure Notification Hub Explorer for VS Code</h1>
 
 Browse device registrations, search them by tag, and send test notifications to an Azure Notification Hub from VS Code. It works like the old **Notification Hub Explorer** in Visual Studio (Server Explorer → Notification Hubs).
 
