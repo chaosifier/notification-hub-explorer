@@ -20,8 +20,8 @@ Browse device registrations, search them by tag, and send test notifications to 
   - Each platform starts with a sample payload. You can add custom headers as JSON.
   - **Test send** mode returns the outcome for each registration (success, or why it failed) and delivers to at most 10 devices.
   - Every send is also logged to the *Notification Hub Explorer* output channel.
-<img width="2047" height="1484" alt="image" src="https://github.com/user-attachments/assets/2bd437b2-ec81-4cc5-bb4b-986abbc3fdf9" />
-<img width="2124" height="599" alt="image" src="https://github.com/user-attachments/assets/50affbb8-d372-4f37-a2f7-8b8f5b0df40b" />
+<img width="100%" alt="azure notification hub explorer Test Send tab" src="https://github.com/user-attachments/assets/2bd437b2-ec81-4cc5-bb4b-986abbc3fdf9" />
+<img width="100%" alt="azure notification hub explorer Device Registrations tab" src="https://github.com/user-attachments/assets/50affbb8-d372-4f37-a2f7-8b8f5b0df40b" />
 
 
 ## Getting started
@@ -48,4 +48,4 @@ npm run typecheck    # tsc --noEmit
 npm run package      # produce a .vsix
 ```
 
-Press **F5** to launch an Extension Development Host. To install the packaged extension, run `code --install-extension notification-hub-explorer-0.1.0.vsix`.
+Press **F5** to launch an Extension Development Host. To install the packaged extension, run with the correct version code e.g. `code --install-extension notification-hub-explorer-0.1.0.vsix`.
