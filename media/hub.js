@@ -183,7 +183,8 @@
     }
     const r = m.response;
     const box = el("div", { className: "result " + (r.failureCount > 0 ? "warn" : "ok") });
-    const summary = m.testSend
+    const hasTestResults = m.testSend && r.state === "DetailedStateAvailable";
+    const summary = hasTestResults
       ? `${time} — ${r.state}: ${r.successCount} succeeded, ${r.failureCount} failed`
       : `${time} — Notification accepted (${r.state})`;
     box.append(el("strong", {}, summary));
@@ -192,7 +193,7 @@
     if (r.trackingId) meta.append(el("span", {}, `Tracking ID: ${r.trackingId}`));
     if (r.correlationId) meta.append(el("span", {}, `Correlation ID: ${r.correlationId}`));
     box.append(meta);
-    if (m.testSend) {
+    if (hasTestResults) {
       if (r.results.length === 0) {
         box.append(el("p", { className: "muted" }, "No registrations matched the target for this platform."));
       } else {
@@ -212,6 +213,8 @@
         table.append(tbody);
         box.append(table);
       }
+    } else if (m.testSend) {
+      box.append(el("p", { className: "muted" }, "Azure accepted the notification but did not return per-device test outcomes. Check notification telemetry in the Azure portal for delivery details."));
     } else {
       box.append(el("p", { className: "muted" }, "Per-device outcomes are only returned for test sends. Check notification telemetry in the Azure portal for delivery details."));
     }

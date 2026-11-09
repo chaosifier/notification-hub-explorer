@@ -1,5 +1,6 @@
 import {
   NotificationHubsClient,
+  RestError,
   createAdmNotification,
   createAppleNotification,
   createBaiduNotification,
@@ -17,6 +18,9 @@ import {
   type NotificationHubsMessageResponse,
   type RegistrationDescription,
 } from "@azure/notification-hubs";
+import { createClientContext, type NotificationHubsClientContext } from "@azure/notification-hubs/api";
+import { createPipelineRequest } from "@azure/core-rest-pipeline";
+import { parseXML } from "@azure/core-xml";
 
 export type SendPlatform =
   | "apple"
@@ -208,12 +212,14 @@ type PageIterator = AsyncIterator<RegistrationDescription[]>;
 /** Wraps the Notification Hubs SDK with paging state and send helpers. */
 export class HubService {
   readonly client: NotificationHubsClient;
+  private readonly clientContext: NotificationHubsClientContext;
   private pager?: PageIterator;
   private pagerDone = true;
   private pageSize = 100;
 
   constructor(connectionString: string, hubName: string) {
     this.client = new NotificationHubsClient(connectionString, hubName);
+    this.clientContext = createClientContext(connectionString, hubName);
   }
 
   async firstPage(tag: string | undefined, pageSize: number): Promise<RegistrationPage> {
@@ -263,7 +269,7 @@ export class HubService {
     const notification = buildNotification(req.platform, req.body, req.headers);
     switch (req.target) {
       case "broadcast":
-        return this.client.sendBroadcastNotification(notification, { enableTestSend: req.testSend });
+        return this.sendBroadcast(notification, req.testSend);
       case "tag":
         if (!req.tagExpression?.trim()) {
           throw new Error("A tag expression is required.");
@@ -278,5 +284,60 @@ export class HubService {
         }
         return this.client.sendNotification(notification, { deviceHandle: req.deviceHandle.trim() });
     }
+  }
+
+  private async sendBroadcast(notification: Notification, testSend: boolean): Promise<NotificationHubsMessageResponse> {
+    const endpoint = this.clientContext.requestUrl();
+    endpoint.pathname += "/messages/";
+    if (testSend) {
+      endpoint.searchParams.set("test", "true");
+    }
+
+    const headers = await this.clientContext.createHeaders(
+      "sendNotification",
+      notification.headers as Record<string, string> | undefined,
+    );
+    headers.set("ServiceBusNotification-Format", notification.platform);
+    headers.set("Content-Type", notification.contentType);
+
+    const request = createPipelineRequest({ url: endpoint.toString(), method: "POST", headers });
+    request.body = notification.body;
+    const response = await this.clientContext.sendRequest(request);
+    if (response.status !== 201) {
+      throw new RestError(`operation failed with status ${response.status}`, {
+        statusCode: response.status,
+        response,
+      });
+    }
+
+    const location = response.headers.get("Location") ?? undefined;
+    const notificationId = location?.match(/\/messages\/([^/?]+)/)?.[1];
+    const result = {
+      correlationId: response.headers.get("x-ms-correlation-request-id") ?? undefined,
+      trackingId: response.headers.get("TrackingId") ?? undefined,
+      location,
+      notificationId,
+    };
+
+    if (!testSend || !response.bodyAsText) {
+      return { ...result, successCount: 0, failureCount: 0, results: [], state: "Enqueued" };
+    }
+
+    const outcome = (await parseXML(response.bodyAsText, { includeRoot: true })).NotificationOutcome;
+    const resultNode = outcome.Results?.RegistrationResult;
+    const registrationResults = resultNode === undefined ? [] : Array.isArray(resultNode) ? resultNode : [resultNode];
+    const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+    return {
+      ...result,
+      successCount: Number(outcome.Success),
+      failureCount: Number(outcome.Failure),
+      results: registrationResults.map((item: Record<string, unknown>) => ({
+        applicationPlatform: text(item.ApplicationPlatform),
+        registrationId: text(item.RegistrationId),
+        outcome: text(item.Outcome),
+        pnsHandle: text(item.PnsHandle),
+      })),
+      state: "DetailedStateAvailable",
+    };
   }
 }
